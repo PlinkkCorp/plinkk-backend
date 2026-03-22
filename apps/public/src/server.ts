@@ -558,11 +558,7 @@ fastify.setNotFoundHandler(async (request, reply) => {
     include: { role: true }
   }) : null;
 
-  return reply.code(404).view("erreurs/404.ejs", {
-    user: user,
-    currentUser: user,
-    dashboardUrl: process.env.DASHBOARD_URL,
-  });
+  return await replyView(reply, "erreurs/404.ejs", user, {}, 404);
 });
 
 fastify.addHook('onSend', async (request, reply, payload) => {
@@ -580,12 +576,7 @@ fastify.addHook('onSend', async (request, reply, payload) => {
         include: { role: true }
       }) : null;
 
-      const viewData = {
-        user: user,
-        currentUser: user,
-        dashboardUrl: process.env.DASHBOARD_URL,
-      };
-      const html = await fastify.view(`erreurs/${statusCode}.ejs`, viewData);
+      const html = await replyView(reply, `erreurs/${statusCode}.ejs`, user, {}, statusCode);
       reply.header('content-type', 'text/html');
       return html;
     }
@@ -620,12 +611,9 @@ fastify.setErrorHandler(async (error, request, reply) => {
     }) : null;
 
     const template = error.statusCode === 404 ? "erreurs/404.ejs" : "erreurs/500.ejs";
-    return reply.code(error.statusCode).view(template, {
+    return await replyView(reply, template, user, {
       message: error.message,
-      user: user,
-      currentUser: user,
-      dashboardUrl: process.env.DASHBOARD_URL,
-    });
+    }, error.statusCode);
   }
 
   if (request.raw.url?.startsWith("/api")) {
@@ -638,12 +626,9 @@ fastify.setErrorHandler(async (error, request, reply) => {
     include: { role: true }
   }) : null;
 
-  return reply.code(500).view("erreurs/500.ejs", {
+  return await replyView(reply, "erreurs/500.ejs", user, {
     message: error && typeof error === 'object' && 'message' in error ? (error).message ?? "" : "",
-    user: user,
-    currentUser: user,
-    dashboardUrl: process.env.DASHBOARD_URL,
-  });
+  }, 500);
 });
 
 fastify.listen({ port: PORT, host: "0.0.0.0" }, function (err, address) {

@@ -2,9 +2,17 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { RESERVED_SLUGS } from "@plinkk/shared";
 import { generateBundle } from "../lib/generateBundle";
+import { replyView } from "../lib/replyView";
 import { resolvePlinkkPage, generateProfileConfig, coerceThemeData, generateTheme } from "@plinkk/shared";
 import { minify } from "uglify-js";
 import { PlinkkSnapshot } from "../types/plinkk";
+
+async function getCurrentUser(request: any) {
+  const sessionData = request.session?.get("data");
+  const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+  if (!currentUserId) return null;
+  return await prisma.user.findUnique({ where: { id: currentUserId }, include: { role: true } });
+}
 
 export default async function onRequestHook(
   request: FastifyRequest,
@@ -122,10 +130,11 @@ export default async function onRequestHook(
               request
             );
             if (resolved.status !== 200 || !resolved.page || !resolved.user) {
+              const currentUser = await getCurrentUser(request);
               if (resolved.status === 403) {
-                return reply.code(403).view("erreurs/404.ejs", { user: null });
+                return await replyView(reply, "erreurs/404.ejs", currentUser, {}, 403);
               }
-              return reply.code(404).view("erreurs/404.ejs", { user: null });
+              return await replyView(reply, "erreurs/404.ejs", currentUser, {}, 404);
             }
 
             const query = (request.query as { versionId?: string });
@@ -188,7 +197,8 @@ export default async function onRequestHook(
                 ? displayPage.slug
                 : displayUser.id;
 
-            return reply.view("plinkk/show.ejs", {
+            const currentUser = await getCurrentUser(request);
+            return await replyView(reply, "plinkk/show.ejs", currentUser, {
               page: displayPage,
               userId: displayUser.id,
               username: displayUser.id,
@@ -512,7 +522,8 @@ export default async function onRequestHook(
             );
           }
           // Si domaine vérifié mais route non trouvée, afficher "Accès restreint"
-          return reply.code(409).view("erreurs/reserved.ejs");
+          const currentUser = await getCurrentUser(request);
+          return await replyView(reply, "erreurs/reserved.ejs", currentUser, {}, 409);
         }
       } // end else (not a dev public route)
     }

@@ -274,8 +274,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           }
           // if page exists but resolve failed (private/inactive), return appropriate status
           if (resolved.status === 403)
-            return reply.code(403).view("erreurs/404.ejs", { user: null });
-          return reply.code(404).view("erreurs/404.ejs", { user: null });
+            return await replyView(reply, "erreurs/404.ejs", null, {}, 403);
+          return await replyView(reply, "erreurs/404.ejs", null, {}, 404);
         }
       } catch (e) {
         // ignore and fallback to username-based resolution below
@@ -289,9 +289,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         request,
       );
       if (resolved.status !== 200) {
-        return reply
-          .code(resolved.status)
-          .view("erreurs/404.ejs", { user: null });
+        return await replyView(reply, "erreurs/404.ejs", null, {}, resolved.status);
       }
 
       // Tracking des vues géré côté client via localStorage
