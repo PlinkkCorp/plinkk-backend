@@ -1,18 +1,23 @@
+<% 
+  const safeDesc = (typeof desc !== 'undefined' && desc) ? desc : ((typeof description !== 'undefined' && description) ? description : 'L’alternative open-source à Linktree. Créez une page de liens magnifique, rapide et entièrement personnalisable.');
+  const safeCspNonce = (typeof cspNonce !== 'undefined' ? cspNonce : '');
+  const safeTitle = (typeof title !== 'undefined' ? title : 'Plinkk');
+%>
 <!DOCTYPE html>
 <html lang="fr">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <%- include('meta_tags') %>
+  <%- include('meta_tags', { title: safeTitle, description: safeDesc }) %>
   
   <!-- Métadonnées structurées JSON-LD -->
-  <script type="application/ld+json" nonce="<%= (typeof cspNonce !== 'undefined' ? cspNonce : '') %>">
+  <script type="application/ld+json" nonce="<%= safeCspNonce %>">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "Plinkk",
-    "description": "<%= desc.replace(/"/g, '\\"') %>",
+    "description": "<%= safeDesc.replace(/"/g, '\\"') %>",
     "url": "https://plinkk.fr",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Any",
@@ -304,11 +309,11 @@
                   }
                 }
               </style>
-              <%= (typeof extraHead !=='undefined' ? extraHead : '' ) %>
+              <%- (typeof extraHead !=='undefined' ? extraHead : '' ) %>
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-[#0B1020] via-slate-950 to-[#0b1324] text-slate-100 animate-fade-in">
-  <script nonce="<%= (typeof cspNonce !== 'undefined' ? cspNonce : '') %>">
+  <script nonce="<%= safeCspNonce %>">
     window.__PLINKK_CDN_URL__ = "<%= ((typeof cdnUrl !== 'undefined' && cdnUrl) ? cdnUrl : 'https://cdn.plinkk.fr') %>";
     (() => {
       try {
