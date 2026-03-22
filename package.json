@@ -21,7 +21,8 @@
     "build:public": "cd apps/public && bun run build",
     "dev:dashboard": "cd apps/dashboard && bun run dev",
     "dev:public": "cd apps/public && bun run dev",
-    "launch-all": "concurrently \"cd apps/dashboard && bun run dev\" \"cd apps/public && bun run dev\""
+    "launch-all": "concurrently \"cd apps/dashboard && bun run dev\" \"cd apps/public && bun run dev\"",
+    "update": "bun upgrade && bun update"
   },
   "devDependencies": {
     "@prisma/adapter-pg": "^7.5.0",
@@ -46,7 +47,7 @@
     "minimatch": ">=9.0.5",
     "undici": ">=6.19.2",
     "hono": ">=4.4.11",
-    "@hono/node-server": ">=1.11.1",
+    "@hono/node-server": ">=1.19.0",
     "ws": ">=7.4.6",
     "glob": ">=9.0.0",
     "lodash": ">=4.17.23",
@@ -62,7 +63,7 @@
     "minimatch": ">=9.0.5",
     "undici": ">=6.19.2",
     "hono": ">=4.4.11",
-    "@hono/node-server": ">=1.11.1",
+    "@hono/node-server": ">=1.19.0",
     "ws": ">=7.4.6",
     "glob": ">=9.0.0",
     "lodash": ">=4.17.23",

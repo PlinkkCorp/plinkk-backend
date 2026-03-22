@@ -165,7 +165,7 @@
   },
   "overrides": {
     "@fastify/reply-from": ">=9.7.0",
-    "@hono/node-server": ">=1.11.1",
+    "@hono/node-server": ">=1.19.0",
     "@isaacs/brace-expansion": ">=2.0.1",
     "@types/pg": "8.18.0",
     "ajv": ">=8.12.1",
