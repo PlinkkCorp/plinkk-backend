@@ -22,6 +22,20 @@ function isAllowedWebhookUrl(urlString: string): boolean {
   }
 }
 
+function getSafeDiscordWebhookUrl(urlString: string): string {
+  const url = new URL(urlString);
+
+  if (url.protocol !== "https:") {
+    throw new Error("Invalid protocol for Discord webhook URL");
+  }
+
+  if (!ALLOWED_WEBHOOK_HOSTS.includes(url.hostname)) {
+    throw new Error("Invalid host for Discord webhook URL");
+  }
+
+  return url.toString();
+}
+
 export function adminSettingsRoutes(fastify: FastifyInstance) {
   // Page des paramètres
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
@@ -126,7 +140,8 @@ export function adminSettingsRoutes(fastify: FastifyInstance) {
     };
 
     try {
-      const response = await fetch(webhookUrl, {
+      const safeWebhookUrl = getSafeDiscordWebhookUrl(webhookUrl);
+      const response = await fetch(safeWebhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
