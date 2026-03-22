@@ -17,7 +17,7 @@
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "Plinkk",
-    "description": "<%= safeDesc.replace(/"/g, '\\"') %>",
+    "description": "<%- JSON.stringify(safeDesc).slice(1, -1) %>",
     "url": "https://plinkk.fr",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Any",

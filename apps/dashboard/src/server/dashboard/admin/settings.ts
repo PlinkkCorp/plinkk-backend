@@ -5,6 +5,21 @@ import { logAdminAction } from "../../../lib/adminLogger";
 import { requireAuthRedirect, requireAuth } from "../../../middleware/auth";
 import { prisma } from "@plinkk/prisma";
 
+const ALLOWED_WEBHOOK_HOSTS = ["discord.com", "discordapp.com"];
+
+function isAllowedWebhookUrl(urlString: string): boolean {
+  try {
+    const url = new URL(urlString);
+    if (url.protocol !== "https:") return false;
+    const hostname = url.hostname.toLowerCase();
+    return ALLOWED_WEBHOOK_HOSTS.some(
+      (h) => hostname === h || hostname.endsWith("." + h)
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function adminSettingsRoutes(fastify: FastifyInstance) {
   // Page des paramètres
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
@@ -57,13 +72,8 @@ export function adminSettingsRoutes(fastify: FastifyInstance) {
 
     // Validation URL pour les webhooks
     if (key.startsWith("discord_webhook_") && value) {
-      try {
-        const url = new URL(value);
-        if (!url.hostname.includes("discord.com") && !url.hostname.includes("discordapp.com")) {
-          return reply.code(400).send({ error: "invalid_webhook_url" });
-        }
-      } catch (e) {
-        return reply.code(400).send({ error: "invalid_url_format" });
+      if (!isAllowedWebhookUrl(value)) {
+        return reply.code(400).send({ error: "invalid_webhook_url" });
       }
     }
 
@@ -96,13 +106,8 @@ export function adminSettingsRoutes(fastify: FastifyInstance) {
       return reply.code(400).send({ error: "webhook_url_required" });
     }
 
-    try {
-      const url = new URL(webhookUrl);
-      if (!url.hostname.includes("discord.com") && !url.hostname.includes("discordapp.com")) {
-        return reply.code(400).send({ error: "invalid_webhook_url" });
-      }
-    } catch (e) {
-      return reply.code(400).send({ error: "invalid_url_format" });
+    if (!isAllowedWebhookUrl(webhookUrl)) {
+      return reply.code(400).send({ error: "invalid_webhook_url" });
     }
 
     // Envoi d'un message de test

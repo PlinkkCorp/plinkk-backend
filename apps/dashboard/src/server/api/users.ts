@@ -103,8 +103,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     }
     if (typeof email === 'string') {
       const mail = email.trim();
-      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!re.test(mail)) return reply.code(400).send({ error: 'Email invalid' });
+      const mailValid = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(mail);
+      if (!mailValid) return reply.code(400).send({ error: 'Email invalid' });
       const exists = await prisma.user.findFirst({ where: { email: { equals: mail, mode: 'insensitive' }, id: { not: id } } });
       if (exists) return reply.code(409).send({ error: 'Email taken' });
       data.email = mail;
