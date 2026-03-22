@@ -36,11 +36,11 @@ export function joinRoutes(fastify: FastifyInstance) {
     const me = await getCurrentUserForJoin(request);
     if (me && (!me.hasPassword || me.emailVerified)) return reply.redirect("/");
 
-    const queryEmail = (request.query).email ?? "";
+    const queryEmail = (request.query as any).email ?? "";
     const formEmail = me?.hasPassword && !me.emailVerified ? me.email : queryEmail;
     const googleClientId = process.env.GOOGLE_OAUTH2_ID || process.env.ID_CLIENT;
     return replyView(reply, "join.ejs", null, {
-      error: (request.query).error ?? null,
+      error: (request.query as any).error ?? null,
       email: formEmail,
       googleClientId,
     });

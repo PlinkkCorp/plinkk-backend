@@ -24,6 +24,7 @@ interface OnboardingData {
   firstLinkTitle?: string;
   firstLinkUrl?: string;
   firstLinkIcon?: string;
+  [key: string]: any;
 }
 
 export function onboardingRoutes(fastify: FastifyInstance) {

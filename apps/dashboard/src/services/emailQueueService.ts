@@ -210,7 +210,7 @@ export const emailQueueService = {
     limit: number = 100
   ): Promise<QueuedEmail[]> {
     return prisma.emailQueue.findMany({
-      where: status ? { status: status } : {},
+      where: status ? { status: status as any } : {},
       orderBy: [
         { priority: "desc" },
         { createdAt: "desc" }

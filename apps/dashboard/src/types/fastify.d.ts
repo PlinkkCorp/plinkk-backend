@@ -25,6 +25,7 @@ declare module "fastify" {
 
   interface FastifyRequest {
     userId?: string;
+    adminId?: string;
     currentUser?: import("@plinkk/prisma").User & { role: import("@plinkk/prisma").Role | null };
     publicPath?: string;
     rawBody?: string | Buffer;

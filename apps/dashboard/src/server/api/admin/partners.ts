@@ -24,7 +24,7 @@ export function apiAdminPartnersRoutes(fastify: FastifyInstance) {
       return reply.code(403).send({ error: "forbidden" });
     }
     // Store userId for later use in routes
-    (request).adminId = String(userId);
+    request.adminId = String(userId);
   });
 
   // --- UPLOAD ---
@@ -150,7 +150,7 @@ export function apiAdminPartnersRoutes(fastify: FastifyInstance) {
       }
     });
 
-    await logAdminAction((request).adminId, 'CREATE_PARTNER', partner.id, body, request.ip);
+    await logAdminAction(request.adminId!, 'CREATE_PARTNER', partner.id, body, request.ip);
 
     return reply.send({ ok: true, partner });
   });
@@ -174,7 +174,7 @@ export function apiAdminPartnersRoutes(fastify: FastifyInstance) {
         }
       });
 
-      await logAdminAction((request).adminId, 'UPDATE_PARTNER', id, body, request.ip);
+      await logAdminAction(request.adminId!, 'UPDATE_PARTNER', id, body, request.ip);
 
       return reply.send({ ok: true, partner });
     } catch (e) {
@@ -186,7 +186,7 @@ export function apiAdminPartnersRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
     try {
       await prisma.partner.delete({ where: { id } });
-      await logAdminAction((request).adminId, 'DELETE_PARTNER', id, {}, request.ip);
+      await logAdminAction(request.adminId!, 'DELETE_PARTNER', id, {}, request.ip);
       return reply.send({ ok: true });
     } catch (e) {
       return reply.code(404).send({ error: "not_found" });
@@ -214,7 +214,7 @@ export function apiAdminPartnersRoutes(fastify: FastifyInstance) {
         }
       });
 
-      await logAdminAction((request).adminId, 'CREATE_QUEST', quest.id, { ...body, partnerId }, request.ip);
+      await logAdminAction(request.adminId!, 'CREATE_QUEST', quest.id, { ...body, partnerId }, request.ip);
 
       return reply.send({ ok: true, quest });
     } catch (e) {
@@ -239,7 +239,7 @@ export function apiAdminPartnersRoutes(fastify: FastifyInstance) {
         }
       });
 
-      await logAdminAction((request).adminId, 'UPDATE_QUEST', questId, { ...body, partnerId }, request.ip);
+      await logAdminAction(request.adminId!, 'UPDATE_QUEST', questId, { ...body, partnerId }, request.ip);
 
       return reply.send({ ok: true, quest });
     } catch (e) {
@@ -251,7 +251,7 @@ export function apiAdminPartnersRoutes(fastify: FastifyInstance) {
     const { partnerId, questId } = request.params as { partnerId: string, questId: string };
     try {
       await prisma.partnerQuest.delete({ where: { id: questId } });
-      await logAdminAction((request).adminId, 'DELETE_QUEST', questId, { partnerId }, request.ip);
+      await logAdminAction(request.adminId!, 'DELETE_QUEST', questId, { partnerId }, request.ip);
       return reply.send({ ok: true });
     } catch (e) {
       return reply.code(404).send({ error: "not_found" });
