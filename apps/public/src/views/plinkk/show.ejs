@@ -59,10 +59,10 @@
       "@type": "ProfilePage",
       "mainEntity": {
         "@type": "Person",
-        "name": "<%= pageTitle.replace(/"/g, '\\"') %>",
-        "description": "<%= pageDesc.replace(/"/g, '\\"') %>",
-        "url": "<%= pageUrl %>",
-        "image": "<%= ogImage %>"
+        "name": <%- JSON.stringify(pageTitle) %>,
+        "description": <%- JSON.stringify(pageDesc) %>,
+        "url": <%- JSON.stringify(pageUrl) %>,
+        "image": <%- JSON.stringify(ogImage) %>
       },
       "isPartOf": {
         "@type": "WebSite",

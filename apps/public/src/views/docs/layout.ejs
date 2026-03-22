@@ -19,8 +19,8 @@
     {
       "@context": "https://schema.org",
       "@type": "TechArticle",
-      "headline": "${__DOC__ ? __DOC__.title.replace(/"/g, '\\"') : 'Documentation Plinkk'}",
-      "description": "${(__DOC__ && __DOC__.excerpt) ? __DOC__.excerpt.replace(/"/g, '\\"') : 'Guide complet Plinkk'}",
+      "headline": ${JSON.stringify(__DOC__ ? __DOC__.title : 'Documentation Plinkk')},
+      "description": ${JSON.stringify((__DOC__ && __DOC__.excerpt) ? __DOC__.excerpt : 'Guide complet Plinkk')},
       "url": "https://plinkk.fr${__DOC__ ? __DOC__.path : '/docs'}",
       "author": {
         "@type": "Organization",
