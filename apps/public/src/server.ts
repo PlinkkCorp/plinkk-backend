@@ -107,6 +107,7 @@ fastify.addHook('onSend', async (request, reply, payload) => {
   const csp = `default-src 'self'; script-src ${scriptSrc}; style-src ${styleSrc}; font-src ${fontSrc}; connect-src ${connectSrc}; frame-src ${frameSrc}; frame-ancestors ${frameAncestors}; img-src ${imgSrc}; object-src 'none';`;
 
   reply.header('Content-Security-Policy-Report-Only', csp);
+  return payload;
 });
 const PORT = Number(process.env.PORT) || 3002;
 
