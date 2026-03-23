@@ -22,15 +22,17 @@ import { replyView } from "./lib/replyView";
 
 const fastify = Fastify({ logger: true, trustProxy: true });
 
+const isProduction = process.env.FRONTEND_URL?.includes("plinkk.fr") ?? false;
+
 fastify.register(fastifyHelmet, {
   // Disable helmet's CSP handling — we'll set a per-request CSP header below
   contentSecurityPolicy: false,
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  hsts: {
+  hsts: isProduction ? {
     maxAge: 31536000,
     includeSubDomains: true,
     preload: true,
-  },
+  } : false,
   referrerPolicy: {
     policy: "strict-origin-when-cross-origin",
   },
@@ -57,6 +59,8 @@ fastify.addHook("onSend", async (request, reply, payload) => {
   // Build CSP header string (keep same sources as before, add nonce and hashes)
   const scriptSrc = [
     "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
     "https://accounts.google.com",
     "https://cdn.tailwindcss.com",
     "https://cdn.jsdelivr.net",
@@ -70,11 +74,11 @@ fastify.addHook("onSend", async (request, reply, payload) => {
     .join(" ");
 
   const styleSrc =
-    "'self' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com";
+    "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com";
   const fontSrc = "'self' https://cdn.jsdelivr.net https://fonts.gstatic.com";
   const connectSrc = "'self' https://unpkg.com";
-  const frameSrc = "'self' https://accounts.google.com";
-  const frameAncestors = "'self' https://plinkk.fr https://dash.plinkk.fr";
+  const frameSrc = "'self' https://accounts.google.com https://plinkk.fr http://127.0.0.1:3002 http://localhost:3002";
+  const frameAncestors = "'self' https://plinkk.fr https://dash.plinkk.fr http://127.0.0.1:3001 http://localhost:3001 http://127.0.0.1:3002 http://localhost:3002";
   const imgSrc =
     "'self' data: https://cdn.plinkk.fr https://cdn.jsdelivr.net https://lh3.googleusercontent.com https://s3.marvideo.fr https://unpkg.com https://cdn.discordapp.com https://www.vistemo.xyz";
 

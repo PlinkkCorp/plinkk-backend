@@ -56,11 +56,12 @@ fastify.register(fastifyHelmet, {
   // Disable helmet's CSP handling — we'll set a per-request CSP header below
   contentSecurityPolicy: false,
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  hsts: {
+  xFrameOptions: false,
+  hsts: (process.env.FRONTEND_URL?.includes("plinkk.fr") ?? false) ? {
     maxAge: 31536000,
     includeSubDomains: true,
     preload: true,
-  },
+  } : false,
   referrerPolicy: {
     policy: "strict-origin-when-cross-origin",
   },
@@ -86,6 +87,8 @@ fastify.addHook('onSend', async (request, reply, payload) => {
   // Build CSP header string (keep same sources as before, add nonce and hashes)
   const scriptSrc = [
     "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
     "https://accounts.google.com",
     "https://cdn.tailwindcss.com",
     "https://cdn.jsdelivr.net",
@@ -97,11 +100,11 @@ fastify.addHook('onSend', async (request, reply, payload) => {
     nonce ? `'nonce-${nonce}'` : null,
   ].filter(Boolean).join(' ');
 
-  const styleSrc = "'self' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com";
+  const styleSrc = "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com";
   const fontSrc = "'self' https://cdn.jsdelivr.net https://fonts.gstatic.com";
   const connectSrc = "'self' https://unpkg.com";
-  const frameSrc = "'self' https://accounts.google.com";
-  const frameAncestors = "'self' https://plinkk.fr https://dash.plinkk.fr";
+  const frameSrc = "*";
+  const frameAncestors = "*";
   const imgSrc = "'self' data: https://cdn.plinkk.fr https://cdn.jsdelivr.net https://lh3.googleusercontent.com https://s3.marvideo.fr https://unpkg.com https://cdn.discordapp.com https://www.vistemo.xyz";
 
   const csp = `default-src 'self'; script-src ${scriptSrc}; style-src ${styleSrc}; font-src ${fontSrc}; connect-src ${connectSrc}; frame-src ${frameSrc}; frame-ancestors ${frameAncestors}; img-src ${imgSrc}; object-src 'none';`;
