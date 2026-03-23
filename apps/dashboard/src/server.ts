@@ -212,17 +212,10 @@ async function bootstrap() {
       return reply.code(404).send({ error: "Not Found" });
     }
     const sessionData = request.session.get("data");
-    const userId = (
-      typeof sessionData === "object" ? sessionData?.id : sessionData
-    ) as string | undefined;
-    const user = userId
-      ? await prisma.user.findUnique({
-          where: { id: userId },
-          include: { role: true },
-        })
-      : null;
-
-    return await replyView(reply, "erreurs/404.ejs", user, {}, 404);
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+    return reply
+      .code(404)
+      .view("erreurs/404.ejs", { currentUser: userId ? { id: userId } : null, cspNonce: (request as any).cspNonce || '' });
   });
 
   fastify.setErrorHandler((error, request, reply) => {
@@ -253,6 +246,7 @@ async function bootstrap() {
       return reply.code(error.statusCode).view(template, {
         message: error.message,
         currentUser: userId ? { id: userId } : null,
+        cspNonce: (request as any).cspNonce || '',
       });
     }
 
@@ -266,6 +260,7 @@ async function bootstrap() {
     return reply.code(500).view("erreurs/500.ejs", {
       message: error instanceof Error ? error.message : "",
       currentUser: userId ? { id: userId } : null,
+      cspNonce: (request as any).cspNonce || '',
     });
   });
 

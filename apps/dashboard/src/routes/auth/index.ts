@@ -35,7 +35,6 @@ export function authRoutes(fastify: FastifyInstance) {
     instance.register(joinRoutes);
     instance.register(verifyRoutes);
   }, {
-    prefix: "/auth",
     config: {
       rateLimit: {
         max: 5,
