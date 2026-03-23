@@ -18,6 +18,7 @@ import { discordService } from "./services/discordService";
 import { AppError, generateTheme } from "@plinkk/shared";
 import fastifyHelmet from "@fastify/helmet";
 import crypto from "crypto";
+import { replyView } from "./lib/replyView";
 
 const fastify = Fastify({ logger: true, trustProxy: true });
 
@@ -36,22 +37,23 @@ fastify.register(fastifyHelmet, {
 });
 
 // Generate a per-request nonce and set a CSP header that includes it.
-fastify.addHook('onRequest', async (request, reply) => {
+fastify.addHook("onRequest", async (request, reply) => {
   try {
-    const nonce = crypto.randomBytes(16).toString('base64');
+    const nonce = crypto.randomBytes(16).toString("base64");
     (request as any).cspNonce = nonce;
   } catch (err) {
     // If crypto fails (very unlikely), use a fixed fallback to avoid breaking templates that expect a nonce.
-    (request as any).cspNonce = 'fallback';
+    (request as any).cspNonce = "fallback";
   }
 });
 
-fastify.addHook('onSend', async (request, reply, payload) => {
+fastify.addHook("onSend", async (request, reply, payload) => {
   if (reply.raw.headersSent || (reply as any).sent) {
     return payload;
   }
 
-  const nonce = (request as any).cspNonce || crypto.randomBytes(16).toString('base64');
+  const nonce =
+    (request as any).cspNonce || crypto.randomBytes(16).toString("base64");
   // Build CSP header string (keep same sources as before, add nonce and hashes)
   const scriptSrc = [
     "'self'",
@@ -63,18 +65,22 @@ fastify.addHook('onSend', async (request, reply, payload) => {
     "https://cdnjs.cloudflare.com",
     "https://unpkg.com",
     nonce ? `'nonce-${nonce}'` : null,
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(" ");
 
-  const styleSrc = "'self' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com";
+  const styleSrc =
+    "'self' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com";
   const fontSrc = "'self' https://cdn.jsdelivr.net https://fonts.gstatic.com";
   const connectSrc = "'self' https://unpkg.com";
   const frameSrc = "'self' https://accounts.google.com";
   const frameAncestors = "'self' https://plinkk.fr https://dash.plinkk.fr";
-  const imgSrc = "'self' data: https://cdn.plinkk.fr https://cdn.jsdelivr.net https://lh3.googleusercontent.com https://s3.marvideo.fr https://unpkg.com https://cdn.discordapp.com https://www.vistemo.xyz";
+  const imgSrc =
+    "'self' data: https://cdn.plinkk.fr https://cdn.jsdelivr.net https://lh3.googleusercontent.com https://s3.marvideo.fr https://unpkg.com https://cdn.discordapp.com https://www.vistemo.xyz";
 
   const csp = `default-src 'self'; script-src ${scriptSrc}; style-src ${styleSrc}; font-src ${fontSrc}; connect-src ${connectSrc}; frame-src ${frameSrc}; frame-ancestors ${frameAncestors}; img-src ${imgSrc}; object-src 'none';`;
 
-  return reply.header('Content-Security-Policy-Report-Only', csp);
+  return reply.header("Content-Security-Policy-Report-Only", csp);
 });
 
 const PORT = 3001;
@@ -82,7 +88,7 @@ const PORT = 3001;
 async function bootstrap() {
   await registerPlugins(fastify);
   await registerCronJobs(fastify);
-  await registerOAuth2(fastify)
+  await registerOAuth2(fastify);
 
   // Initialiser Discord sans bloquer le démarrage du serveur
   void discordService.initialize();
@@ -104,16 +110,13 @@ async function bootstrap() {
     async (request, reply) => {
       const { userId } = request.query as { userId: string };
       return reply.send(await generateTheme(userId));
-    }
+    },
   );
 
   fastify.get("/*", async (request, reply) => {
     const url = request.raw.url || "";
 
-    if (
-      url.startsWith("/api") ||
-      url.startsWith("/public")
-    ) {
+    if (url.startsWith("/api") || url.startsWith("/public")) {
       return reply.callNotFound();
     }
 
@@ -145,9 +148,9 @@ async function bootstrap() {
 
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
-        where: { id: currentUserId },
-        include: { role: true },
-      })
+          where: { id: currentUserId },
+          include: { role: true },
+        })
       : null;
 
     if (!currentUser) {
@@ -156,7 +159,15 @@ async function bootstrap() {
 
     const userId = currentUserId!;
 
-    const [linksCount, socialsCount, labelsCount, recentLinks, plinkks, userViews, totalClicks] = await Promise.all([
+    const [
+      linksCount,
+      socialsCount,
+      labelsCount,
+      recentLinks,
+      plinkks,
+      userViews,
+      totalClicks,
+    ] = await Promise.all([
       prisma.link.count({ where: { userId } }),
       prisma.socialIcon.count({ where: { userId } }),
       prisma.label.count({ where: { userId } }),
@@ -167,7 +178,13 @@ async function bootstrap() {
       }),
       prisma.plinkk.findMany({
         where: { userId },
-        select: { id: true, name: true, slug: true, isDefault: true, views: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          isDefault: true,
+          views: true,
+        },
         orderBy: [{ isDefault: "desc" }, { index: "asc" }],
       }),
       // Total views across all user's plinkks
@@ -184,20 +201,27 @@ async function bootstrap() {
 
     const views = userViews._sum.views || 0;
     const clicks = totalClicks._sum.clicks || 0;
-    const ctr = views > 0 ? ((clicks / views) * 100).toFixed(1) + '%' : '0%';
+    const ctr = views > 0 ? ((clicks / views) * 100).toFixed(1) + "%" : "0%";
 
     return reply.callNotFound();
   });
 
-  fastify.setNotFoundHandler((request, reply) => {
+  fastify.setNotFoundHandler(async (request, reply) => {
     if (request.raw.url?.startsWith("/api")) {
       return reply.code(404).send({ error: "Not Found" });
     }
     const sessionData = request.session.get("data");
-    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
-    return reply
-      .code(404)
-      .view("erreurs/404.ejs", { currentUser: userId ? { id: userId } : null });
+    const userId = (
+      typeof sessionData === "object" ? sessionData?.id : sessionData
+    ) as string | undefined;
+    const user = userId
+      ? await prisma.user.findUnique({
+          where: { id: userId },
+          include: { role: true },
+        })
+      : null;
+
+    return await replyView(reply, "erreurs/404.ejs", user, {}, 404);
   });
 
   fastify.setErrorHandler((error, request, reply) => {
@@ -209,19 +233,22 @@ async function bootstrap() {
         url: request.url,
         statusCode,
       },
-      "Request failed"
+      "Request failed",
     );
 
     if (error instanceof AppError) {
       if (request.raw.url?.startsWith("/api")) {
         return reply.code(error.statusCode).send({
           error: error.code.toLowerCase(),
-          message: error.message
+          message: error.message,
         });
       }
       const sessionData = request.session.get("data");
-      const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
-      const template = error.statusCode === 404 ? "erreurs/404.ejs" : "erreurs/500.ejs";
+      const userId = (
+        typeof sessionData === "object" ? sessionData?.id : sessionData
+      ) as string | undefined;
+      const template =
+        error.statusCode === 404 ? "erreurs/404.ejs" : "erreurs/500.ejs";
       return reply.code(error.statusCode).view(template, {
         message: error.message,
         currentUser: userId ? { id: userId } : null,
@@ -232,7 +259,9 @@ async function bootstrap() {
       return reply.code(500).send({ error: "internal_server_error" });
     }
     const sessionData = request.session.get("data");
-    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+    const userId = (
+      typeof sessionData === "object" ? sessionData?.id : sessionData
+    ) as string | undefined;
     return reply.code(500).view("erreurs/500.ejs", {
       message: error instanceof Error ? error.message : "",
       currentUser: userId ? { id: userId } : null,
