@@ -50,7 +50,7 @@ function computeFrontendUrl(reply: FastifyReply) {
  * @returns A promise that resolves when the reply is sent
  */
 export async function replyView(
-  reply: FastifyReply,
+  reply: FastifyReply<any, any, any, any, any, any, any, any>,
   template: string,
   user: UserWithInclude,
   data: ejs.Data,

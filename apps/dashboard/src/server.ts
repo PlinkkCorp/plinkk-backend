@@ -224,7 +224,7 @@ async function bootstrap() {
     return await replyView(reply, "erreurs/404.ejs", user, {}, 404);
   });
 
-  fastify.setErrorHandler((error, request, reply) => {
+  fastify.setErrorHandler(async (error, request, reply) => {
     const statusCode = error instanceof AppError ? error.statusCode : 500;
     request.log.error(
       {
@@ -247,12 +247,18 @@ async function bootstrap() {
       const userId = (
         typeof sessionData === "object" ? sessionData?.id : sessionData
       ) as string | undefined;
+
+      const user = userId ? await prisma.user.findUnique({
+        where: { id: userId },
+        include: { role: true }
+      }) : null;
+
       const template =
         error.statusCode === 404 ? "erreurs/404.ejs" : "erreurs/500.ejs";
-      return reply.code(error.statusCode).view(template, {
+
+      return await replyView(reply, template, user, {
         message: error.message,
-        currentUser: userId ? { id: userId } : null,
-      });
+      }, error.statusCode);
     }
 
     if (request.raw.url?.startsWith("/api")) {
@@ -262,10 +268,15 @@ async function bootstrap() {
     const userId = (
       typeof sessionData === "object" ? sessionData?.id : sessionData
     ) as string | undefined;
-    return reply.code(500).view("erreurs/500.ejs", {
-      message: error instanceof Error ? error.message : "",
-      currentUser: userId ? { id: userId } : null,
-    });
+
+    const user = userId ? await prisma.user.findUnique({
+      where: { id: userId },
+      include: { role: true }
+    }) : null;
+
+    return await replyView(reply, "erreurs/500.ejs", user, {
+      message: error && typeof error === 'object' && 'message' in error ? (error).message ?? "" : "",
+    }, 500);
   });
 
   fastify.listen({ port: PORT, host: "0.0.0.0" }, (err, address) => {
