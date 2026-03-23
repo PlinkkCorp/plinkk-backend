@@ -30,7 +30,7 @@ function computeFrontendUrl(reply: FastifyReply) {
     const req = reply.request;
     const host = String(req?.headers?.host || "");
     const xfProto = String(req?.headers?.["x-forwarded-proto"] || "").toLowerCase();
-    const proto = (xfProto || req?.protocol || "https").replace(/:$/, "");
+    const proto = (xfProto || req?.protocol || (host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https")).replace(/:$/, "");
     let domain = host.replace(/^dash\./i, "");
     // En dev: dashboard sur 3001 -> public sur 3002
     domain = domain.replace(/:3001$/i, ":3002");

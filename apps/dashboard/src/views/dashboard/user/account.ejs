@@ -1968,7 +1968,7 @@
       })();
     </script>
 
-    <template id="account-plinkks-data"><%= JSON.stringify((typeof plinkks !=='undefined' ) ? plinkks : ((typeof pages
+    <template id="account-plinkks-data"><%- JSON.stringify((typeof plinkks !=='undefined' ) ? plinkks : ((typeof pages
         !=='undefined' ) ? pages : [])) %></template>
 
     <script nonce="<%= cspNonce %>">

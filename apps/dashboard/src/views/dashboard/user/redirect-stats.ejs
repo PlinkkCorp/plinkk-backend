@@ -140,7 +140,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script nonce="<%= cspNonce %>">
 (function() {
-    const chartData = <%= JSON.stringify(chartData) %>;
+    const chartData = <%- JSON.stringify(chartData) %>;
     const ctx = document.getElementById('clicksChart').getContext('2d');
     
     new Chart(ctx, {

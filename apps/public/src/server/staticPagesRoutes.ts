@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { replyView } from "../lib/replyView";
+import { getCurrentUser } from "../lib/auth";
 
 const STATIC_PAGES = [
   { path: "/about", template: "about/about.ejs" },
@@ -19,12 +20,7 @@ const STATIC_PAGES = [
   // (keeps behaviour consistent with /docs)
   // Note: we register the redirect after the STATIC_PAGES handling below
 
-async function getCurrentUser(request: FastifyRequest) {
-  const sessionData = request.session.get("data");
-  if (!sessionData) return null;
-  const userId = typeof sessionData === "object" ? sessionData.id : sessionData;
-  return await prisma.user.findUnique({ where: { id: userId } });
-}
+
 
 function getBaseUrl(request: FastifyRequest): string {
   const host =

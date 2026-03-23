@@ -28,6 +28,7 @@ fastify.register(fastifyHelmet, {
   // Disable helmet's CSP handling — we'll set a per-request CSP header below
   contentSecurityPolicy: false,
   crossOriginResourcePolicy: { policy: "cross-origin" },
+  xFrameOptions: false,
   hsts: isProduction ? {
     maxAge: 31536000,
     includeSubDomains: true,
@@ -68,6 +69,8 @@ fastify.addHook("onSend", async (request, reply, payload) => {
     "https://cdn.jsdelivr.net/npm",
     "https://cdnjs.cloudflare.com",
     "https://unpkg.com",
+    "http://127.0.0.1:3001",
+    "http://127.0.0.1:3002",
     nonce ? `'nonce-${nonce}'` : null,
   ]
     .filter(Boolean)
@@ -77,14 +80,14 @@ fastify.addHook("onSend", async (request, reply, payload) => {
     "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com";
   const fontSrc = "'self' https://cdn.jsdelivr.net https://fonts.gstatic.com";
   const connectSrc = "'self' https://unpkg.com";
-  const frameSrc = "'self' https://accounts.google.com https://plinkk.fr http://127.0.0.1:3002 http://localhost:3002";
-  const frameAncestors = "'self' https://plinkk.fr https://dash.plinkk.fr http://127.0.0.1:3001 http://localhost:3001 http://127.0.0.1:3002 http://localhost:3002";
+  const frameSrc = "*";
+  const frameAncestors = "*";
   const imgSrc =
-    "'self' data: https://cdn.plinkk.fr https://cdn.jsdelivr.net https://lh3.googleusercontent.com https://s3.marvideo.fr https://unpkg.com https://cdn.discordapp.com https://www.vistemo.xyz";
+    "'self' data: https://cdn.plinkk.fr https://cdn.jsdelivr.net https://lh3.googleusercontent.com https://s3.marvideo.fr https://unpkg.com https://cdn.discordapp.com https://www.vistemo.xyz http://127.0.0.1:3001 http://127.0.0.1:3002";
 
-  const csp = `default-src 'self'; script-src ${scriptSrc}; style-src ${styleSrc}; font-src ${fontSrc}; connect-src ${connectSrc}; frame-src ${frameSrc}; frame-ancestors ${frameAncestors}; img-src ${imgSrc}; object-src 'none';`;
+  const csp = `default-src 'self'; script-src ${scriptSrc}; script-src-attr 'unsafe-inline'; style-src ${styleSrc}; font-src ${fontSrc}; connect-src ${connectSrc}; frame-src ${frameSrc}; frame-ancestors ${frameAncestors}; img-src ${imgSrc}; object-src 'none';`;
 
-  reply.header('Content-Security-Policy-Report-Only', csp);
+  reply.header('Content-Security-Policy', csp);
   return payload;
 });
 

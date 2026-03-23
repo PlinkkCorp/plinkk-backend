@@ -510,7 +510,7 @@
                                 <script nonce="<%= cspNonce %>">
                                     (function () {
                                         const ONBOARD_KEY = 'plinkk_onboarding_done';
-                                        const createdAt = <%= JSON.stringify(userCreatedAt || '') %>;
+                                        const createdAt = <%- JSON.stringify(userCreatedAt || '') %>;
 
                                         if (!createdAt || localStorage.getItem(ONBOARD_KEY)) return;
 
@@ -559,7 +559,7 @@
                                         document.getElementById('onboardingBackdrop').addEventListener('click', close);
 
                                         // Copy buttons
-                                        const LINK = <%= JSON.stringify(plinkkUrl || '') %>;
+                                        const LINK = <%- JSON.stringify(plinkkUrl || '') %>;
                                         function setupCopy(btnId, textId) {
                                             const btn = document.getElementById(btnId);
                                             const txt = document.getElementById(textId);
