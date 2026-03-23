@@ -4,16 +4,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <% // Configuration des métadonnées const desc=(typeof description !=='undefined' && description) ? description
-    : 'Crée ta page de liens élégante et personnalisée avec Plinkk.' ; const robotsVal=(typeof robots !=='undefined' &&
-    robots) ? robots : 'index,follow' ; const img=(typeof image !=='undefined' && image) ? image
-    : 'https://cdn.plinkk.fr/logo.svg' ; const canon=(typeof canonical !=='undefined' && canonical) ? canonical : null;
-    const keywords=(typeof metaKeywords !=='undefined' && metaKeywords) ? metaKeywords
-    : 'Plinkk, page de liens, linktree, bio, profil, réseaux sociaux, portfolio, open source' ; const author=(typeof
-    metaAuthor !=='undefined' && metaAuthor) ? metaAuthor : 'Plinkk' ; // Couleurs de thème dynamiques selon la page
-    const themeColors={ default: '#4338CA' , primary: '#A21CAF' , secondary: '#E11D48' , success: '#34D399' ,
-    info: '#0EA5E9' , dark: '#0B1020' }; const themeColor=(typeof pageThemeColor !=='undefined' &&
-    themeColors[pageThemeColor]) ? themeColors[pageThemeColor] : themeColors.default; %>
+  <% 
+    const desc=(typeof description !=='undefined' && description) ? descriptio : 'Crée ta page de liens élégante et personnalisée avec Plinkk.' ; 
+    const robotsVal=(typeof robots !=='undefined' && robots) ? robots : 'index,follow' ; 
+    const img=(typeof image !=='undefined' && image) ? image : 'https://cdn.plinkk.fr/logo.svg' ;
+    const canon=(typeof canonical !=='undefined' && canonical) ? canonical : null;
+    const keywords=(typeof metaKeywords !=='undefined' && metaKeywords) ? metaKeywords : 'Plinkk, page de liens, linktree, bio, profil, réseaux sociaux, portfolio, open source' ; 
+    const author=(typeof metaAuthor !=='undefined' && metaAuthor) ? metaAuthor : 'Plinkk' ;
+    const themeColors={ default: '#4338CA' , primary: '#A21CAF' , secondary: '#E11D48' , success: '#34D399' ,info: '#0EA5E9' , dark: '#0B1020' }; 
+    const themeColor=(typeof pageThemeColor !=='undefined' && themeColors[pageThemeColor]) ? themeColors[pageThemeColor] : themeColors.default; %>
 
     <!-- Métadonnées de base -->
     <title>
