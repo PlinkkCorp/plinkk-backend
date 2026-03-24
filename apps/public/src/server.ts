@@ -97,23 +97,27 @@ fastify.addHook('onSend', async (request, reply, payload) => {
     "https://cdn.tailwindcss.com",
     "https://cdn.jsdelivr.net",
     "https://cdn.plinkk.fr",
-    "https://cdn.jsdelivr.net/npm",
     "https://cdnjs.cloudflare.com",
     "https://unpkg.com",
     "http://127.0.0.1:3001",
     "http://127.0.0.1:3002",
-    "'sha256-VDHJYfrC5LSSrjtGlBejsdD/ny3ifzXqnwtQqrNSD8I='",
-    nonce ? `'nonce-${nonce}'` : null,
   ].filter(Boolean).join(' ');
 
-  const styleSrc = "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com";
+  const styleSrc = [
+    "'self'",
+    "'unsafe-inline'",
+    "https://cdn.jsdelivr.net",
+    "https://fonts.googleapis.com",
+    "https://unpkg.com",
+  ].filter(Boolean).join(' ');
+
   const fontSrc = "'self' https://cdn.jsdelivr.net https://fonts.gstatic.com";
   const connectSrc = "'self' https://unpkg.com";
   const frameSrc = "*";
   const frameAncestors = "*";
   const imgSrc = "'self' data: https://cdn.plinkk.fr https://cdn.jsdelivr.net https://lh3.googleusercontent.com https://s3.marvideo.fr https://unpkg.com https://cdn.discordapp.com https://www.vistemo.xyz http://127.0.0.1:3001 http://127.0.0.1:3002";
 
-  const csp = `default-src 'self'; script-src ${scriptSrc}; script-src-attr 'unsafe-inline'; style-src ${styleSrc}; font-src ${fontSrc}; connect-src ${connectSrc}; frame-src ${frameSrc}; frame-ancestors ${frameAncestors}; img-src ${imgSrc}; object-src 'none';`;
+  const csp = `default-src 'self'; script-src ${scriptSrc} 'unsafe-inline'; script-src-attr 'unsafe-inline'; style-src ${styleSrc}; font-src ${fontSrc}; connect-src ${connectSrc}; frame-src ${frameSrc}; frame-ancestors ${frameAncestors}; img-src ${imgSrc}; object-src 'none';`;
 
   reply.header('Content-Security-Policy', csp);
   return payload;
@@ -150,7 +154,10 @@ fastify.register(fastifyView, {
 });
 
 fastify.register(fastifyStatic, {
-  root: path.join(__dirname, "..", "public"),
+  root: [
+    path.join(__dirname, "public"),
+    path.join(__dirname, "..", "public"),
+  ],
   prefix: "/public/",
 });
 
